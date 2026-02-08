@@ -12,12 +12,28 @@ const LOCAL_VERSION = JSON.parse(
 
 async function checkForUpdate() {
   try {
-    const res = await fetch(
-      "https://api.github.com/repos/new-ground/shipmytoken-skill/releases/latest",
-      { signal: AbortSignal.timeout(3000) }
-    );
-    if (!res.ok) return null;
-    const { tag_name } = await res.json();
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000);
+    const base = "https://api.github.com/repos/new-ground/shipmytoken-skill";
+
+    // Try releases first, fall back to tags
+    let tag_name;
+    const releaseRes = await fetch(`${base}/releases/latest`, {
+      signal: controller.signal
+    });
+    if (releaseRes.ok) {
+      ({ tag_name } = await releaseRes.json());
+    } else {
+      const tagsRes = await fetch(`${base}/tags?per_page=1`, {
+        signal: controller.signal
+      });
+      if (!tagsRes.ok) { clearTimeout(timeout); return null; }
+      const tags = await tagsRes.json();
+      if (!tags.length) { clearTimeout(timeout); return null; }
+      tag_name = tags[0].name;
+    }
+    clearTimeout(timeout);
+
     const latest = tag_name.replace(/^v/, "");
     if (latest !== LOCAL_VERSION) {
       return {
