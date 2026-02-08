@@ -1,0 +1,14 @@
+{
+  "name": "shipmytoken",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "description": "Launch Solana tokens on Pumpfun via OpenClaw",
+  "dependencies": {
+    "@pump-fun/pump-sdk": "latest",
+    "@pump-fun/pump-swap-sdk": "latest",
+    "@solana/web3.js": "^1.98.0",
+    "@solana/spl-token": "^0.4.9",
+    "bs58": "^6.0.0"
+  }
+}
