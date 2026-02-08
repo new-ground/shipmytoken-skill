@@ -73,16 +73,23 @@ When the user wants to launch a token, follow this exact flow:
 - **Symbol**: the token ticker (e.g., "MCAT"). If not provided, suggest one based on the name.
 - **Image**: an attached file or a URL. Ask if not provided.
 
-**Step 2: Collect optional fields (only if the user mentions them)**
-- **Description**: skip if not provided
-- **Twitter URL**: skip if not provided
-- **Telegram URL**: skip if not provided
-- **Website URL**: skip if not provided
-- **Initial buy**: SOL amount to buy at launch. Default: 0 (free creation)
+**Step 2: Collect optional fields**
+If the user did not provide any of the following in their initial message, ask them in a single follow-up:
+- **Description**: a short description of the token
+- **Twitter URL**: optional
+- **Telegram URL**: optional
+- **Website URL**: optional
+- **Initial buy**: SOL amount to buy at launch (0 = free creation, no initial purchase)
+
+Frame it as: "Want to add any details? You can set a description, social links (Twitter, Telegram, Website), and an initial buy amount in SOL. All optional — just say 'no' to skip."
 
 **Step 3: Confirm and launch**
-1. Show a summary of what will be launched, including the fee split (90% user / 10% SHIP MY TOKEN)
-2. Ask for explicit confirmation: "Launch it?"
+1. Show a summary of what will be launched:
+   - Always show: Name, Symbol, Image
+   - Only show Description, Twitter, Telegram, Website if provided (skip if empty)
+   - Only show Initial buy if > 0 SOL (omit entirely if 0 or not set)
+   - Only show fee split if the user customized it (don't show the default 90%/10% split)
+2. Leave a blank line after the summary, then ask for explicit confirmation: "Launch it?"
 3. Only after "yes", run:
 
 ```
@@ -171,7 +178,7 @@ Display the private key with all security warnings from the output. Emphasize th
 
 1. **Never** broadcast a transaction without explicit user confirmation
 2. **Always** show the full summary before launching a token
-3. **Always** include the fee split (90%/10%) in the pre-launch summary
+3. Only include the fee split in the pre-launch summary if the user customized it (don't show the default 90%/10%)
 4. **Never** expose the private key unless the user explicitly asks for a backup
 5. Parse all script output as JSON. Never show raw JSON to the user
 6. If a script returns `success: false`, explain the error in plain language
