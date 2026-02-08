@@ -1,6 +1,36 @@
 import { Keypair } from "@solana/web3.js";
 import bs58 from "bs58";
+import { readFileSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
 import { readConfig, writeConfig, getKey } from "./config.mjs";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const LOCAL_VERSION = JSON.parse(
+  readFileSync(join(__dirname, "..", "package.json"), "utf-8")
+).version;
+
+async function checkForUpdate() {
+  try {
+    const res = await fetch(
+      "https://api.github.com/repos/new-ground/shipmytoken-skill/releases/latest",
+      { signal: AbortSignal.timeout(3000) }
+    );
+    if (!res.ok) return null;
+    const { tag_name } = await res.json();
+    const latest = tag_name.replace(/^v/, "");
+    if (latest !== LOCAL_VERSION) {
+      return {
+        current: LOCAL_VERSION,
+        latest,
+        message: `Update available: v${latest}. Run: npx skills add new-ground/shipmytoken-skill --all`
+      };
+    }
+  } catch {
+    // Network error or timeout — silently skip
+  }
+  return null;
+}
 
 async function main() {
   const args = process.argv.slice(2);
@@ -34,13 +64,17 @@ async function main() {
     return;
   }
 
+  const updateInfo = await checkForUpdate();
+
   const config = await readConfig();
   if (config.SOLANA_PRIVATE_KEY || process.env.SOLANA_PRIVATE_KEY) {
     console.log(JSON.stringify({
       success: true,
       action: "already_configured",
       publicKey: config.SOLANA_PUBLIC_KEY || process.env.SOLANA_PUBLIC_KEY,
-      message: "Wallet already configured."
+      version: LOCAL_VERSION,
+      message: "Wallet already configured.",
+      ...(updateInfo && { update: updateInfo })
     }));
     return;
   }
@@ -56,7 +90,9 @@ async function main() {
     success: true,
     action: "created",
     publicKey,
-    message: "Wallet created and saved to ~/.shipmytoken/config.json"
+    version: LOCAL_VERSION,
+    message: "Wallet created and saved to ~/.shipmytoken/config.json",
+    ...(updateInfo && { update: updateInfo })
   }));
 }
 

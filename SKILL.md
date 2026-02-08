@@ -64,6 +64,8 @@ Ask them to fund the wallet and tell you when ready. Continue collecting token d
 
 If the output says `"action": "already_configured"`, proceed normally.
 
+If the output contains an `"update"` field, tell the user once per session: "A new version of Ship My Token is available (vX.Y.Z). Run `npx skills add new-ground/shipmytoken-skill --all` to update." Don't block the flow — just mention it.
+
 ## Token Launch
 
 When the user wants to launch a token, follow this exact flow:
