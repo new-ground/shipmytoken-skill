@@ -10,7 +10,7 @@ import BN from "bn.js";
 import bs58 from "bs58";
 import { readTokenHistory, writeTokenHistory, getKey } from "./config.mjs";
 
-const SHIPMYTOKEN_WALLET = new PublicKey("SMTWALLETxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+const SHIPMYTOKEN_WALLET = new PublicKey("7Z9vCDFzwe2DsTq4zvmrurScehUYAgUifiycgD6ZYa6T");
 const RPC_URL = process.env.SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com";
 const IPFS_ENDPOINT = "https://pump.fun/api/ipfs";
 const MAX_RETRIES = 3;
