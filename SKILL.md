@@ -1,6 +1,6 @@
 ---
 name: shipmytoken
-description: Launch Solana tokens on Pumpfun, manage fee sharing, claim earnings, and track portfolio. All via chat. Trigger words: token, launch, pumpfun, solana, mint, fee, portfolio.
+description: Launch Solana tokens on Pumpfun, manage fee sharing, claim earnings, and track portfolio. All via chat.
 compatibility: Requires Node.js and ~0.005 SOL for network fees
 metadata:
   author: new-ground
