@@ -42,6 +42,17 @@ async function claimFees(wallet, connection) {
   const results = [];
 
   for (const token of history.tokens) {
+    if (!token.feeSharingConfigured) {
+      results.push({
+        name: token.name,
+        symbol: token.symbol,
+        mint: token.mint,
+        skipped: true,
+        reason: "Fee sharing not configured. 100% of creator fees go directly to the creator wallet.",
+      });
+      continue;
+    }
+
     const mint = new PublicKey(token.mint);
 
     try {

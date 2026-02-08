@@ -100,7 +100,7 @@ node {baseDir}/src/launch.mjs --name "TokenName" --symbol "SYM" --image "/path/t
    - Token name, symbol, mint address
    - Link: `https://pump.fun/coin/<mint>`
    - Fee sharing status
-   - If fee sharing failed, note it will be retried next interaction
+   - If fee sharing failed, explain that 100% of creator fees go directly to the creator's wallet
 
 ## Fee Claiming
 
@@ -110,7 +110,7 @@ When the user says "claim my fees", "check my earnings", or similar:
 node {baseDir}/src/fees.mjs --claim
 ```
 
-Report the breakdown per token: amount claimed, graduated vs bonding curve status. If any tokens are below the minimum distributable fee, explain the threshold.
+Report the breakdown per token: amount claimed, graduated vs bonding curve status. If any tokens are below the minimum distributable fee, explain the threshold. If a token shows as skipped because fee sharing is not configured, explain that 100% of creator fees go directly to the creator's wallet — there is nothing to claim through the script.
 
 ## Fee Sharing Updates
 
@@ -171,7 +171,7 @@ Display the private key with all security warnings from the output. Emphasize th
 - **Insufficient SOL**: Tell the user how much they need and their wallet address to fund
 - **IPFS upload failed**: The script retries 3 times automatically. If it still fails, suggest trying again later
 - **Transaction timeout**: Explain the transaction may still confirm. Check the mint address on pump.fun
-- **Fee sharing failed at launch**: Note it in the response. It will be retried on next interaction.
+- **Fee sharing failed at launch**: Explain that 100% of creator fees go directly to the creator's wallet. No action needed from the user.
 - **Below minimum fee**: Explain the threshold and suggest waiting for more trading activity
 
 ## Important Rules
