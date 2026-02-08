@@ -2,48 +2,38 @@ import { readFile, writeFile, mkdir, rename } from "fs/promises";
 import { join, dirname } from "path";
 import { homedir } from "os";
 
-const OPENCLAW_DIR = join(homedir(), ".openclaw");
-const OPENCLAW_CONFIG = join(OPENCLAW_DIR, "openclaw.json");
+const SMT_DIR = join(homedir(), ".shipmytoken");
+const SMT_CONFIG = join(SMT_DIR, "config.json");
+const SMT_TOKENS = join(SMT_DIR, "tokens.json");
 
-export async function readOpenClawConfig() {
+export async function readConfig() {
   try {
-    const raw = await readFile(OPENCLAW_CONFIG, "utf-8");
+    const raw = await readFile(SMT_CONFIG, "utf-8");
     return JSON.parse(raw);
   } catch {
-    return { skills: { entries: {} } };
+    return {};
   }
 }
 
-export async function writeSkillEnv(key, value) {
-  const config = await readOpenClawConfig();
-  if (!config.skills) config.skills = { entries: {} };
-  if (!config.skills.entries) config.skills.entries = {};
-  if (!config.skills.entries.shipmytoken) config.skills.entries.shipmytoken = { env: {} };
-  if (!config.skills.entries.shipmytoken.env) config.skills.entries.shipmytoken.env = {};
+export async function writeConfig(key, value) {
+  const config = await readConfig();
+  config[key] = value;
 
-  config.skills.entries.shipmytoken.env[key] = value;
-
-  await mkdir(OPENCLAW_DIR, { recursive: true });
-  const tmp = OPENCLAW_CONFIG + ".tmp";
+  await mkdir(SMT_DIR, { recursive: true });
+  const tmp = SMT_CONFIG + ".tmp";
   await writeFile(tmp, JSON.stringify(config, null, 2) + "\n");
-  await rename(tmp, OPENCLAW_CONFIG);
+  await rename(tmp, SMT_CONFIG);
 }
 
-export function getWorkspacePath() {
-  const workspace = process.env.OPENCLAW_WORKSPACE || process.env.WORKSPACE_DIR;
-  if (!workspace) {
-    throw new Error("No workspace directory found. Set OPENCLAW_WORKSPACE or WORKSPACE_DIR.");
-  }
-  return join(workspace, "shipmytoken");
-}
-
-function getTokensPath() {
-  return join(getWorkspacePath(), "tokens.json");
+export async function getKey(name) {
+  if (process.env[name]) return process.env[name];
+  const config = await readConfig();
+  return config[name] || null;
 }
 
 export async function readTokenHistory() {
   try {
-    const raw = await readFile(getTokensPath(), "utf-8");
+    const raw = await readFile(SMT_TOKENS, "utf-8");
     return JSON.parse(raw);
   } catch {
     return { tokens: [] };
@@ -51,9 +41,8 @@ export async function readTokenHistory() {
 }
 
 export async function writeTokenHistory(data) {
-  const tokensPath = getTokensPath();
-  await mkdir(dirname(tokensPath), { recursive: true });
-  const tmp = tokensPath + ".tmp";
+  await mkdir(SMT_DIR, { recursive: true });
+  const tmp = SMT_TOKENS + ".tmp";
   await writeFile(tmp, JSON.stringify(data, null, 2) + "\n");
-  await rename(tmp, tokensPath);
+  await rename(tmp, SMT_TOKENS);
 }

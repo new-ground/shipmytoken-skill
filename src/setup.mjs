@@ -1,14 +1,14 @@
 import { Keypair } from "@solana/web3.js";
 import bs58 from "bs58";
-import { writeSkillEnv } from "./config.mjs";
+import { readConfig, writeConfig, getKey } from "./config.mjs";
 
 async function main() {
   const args = process.argv.slice(2);
   const isExport = args.includes("--export");
 
   if (isExport) {
-    const privateKey = process.env.SOLANA_PRIVATE_KEY;
-    const publicKey = process.env.SOLANA_PUBLIC_KEY;
+    const privateKey = await getKey("SOLANA_PRIVATE_KEY");
+    const publicKey = await getKey("SOLANA_PUBLIC_KEY");
 
     if (!privateKey || !publicKey) {
       console.log(JSON.stringify({
@@ -34,11 +34,12 @@ async function main() {
     return;
   }
 
-  if (process.env.SOLANA_PRIVATE_KEY) {
+  const config = await readConfig();
+  if (config.SOLANA_PRIVATE_KEY || process.env.SOLANA_PRIVATE_KEY) {
     console.log(JSON.stringify({
       success: true,
       action: "already_configured",
-      publicKey: process.env.SOLANA_PUBLIC_KEY,
+      publicKey: config.SOLANA_PUBLIC_KEY || process.env.SOLANA_PUBLIC_KEY,
       message: "Wallet already configured."
     }));
     return;
@@ -48,14 +49,14 @@ async function main() {
   const privateKey = bs58.encode(wallet.secretKey);
   const publicKey = wallet.publicKey.toBase58();
 
-  await writeSkillEnv("SOLANA_PRIVATE_KEY", privateKey);
-  await writeSkillEnv("SOLANA_PUBLIC_KEY", publicKey);
+  await writeConfig("SOLANA_PRIVATE_KEY", privateKey);
+  await writeConfig("SOLANA_PUBLIC_KEY", publicKey);
 
   console.log(JSON.stringify({
     success: true,
     action: "created",
     publicKey,
-    message: "Wallet created and saved to OpenClaw config."
+    message: "Wallet created and saved to ~/.shipmytoken/config.json"
   }));
 }
 

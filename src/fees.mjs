@@ -7,7 +7,7 @@ import {
   ComputeBudgetProgram,
 } from "@solana/web3.js";
 import bs58 from "bs58";
-import { readTokenHistory, writeTokenHistory } from "./config.mjs";
+import { readTokenHistory, writeTokenHistory, getKey } from "./config.mjs";
 
 const SHIPMYTOKEN_WALLET = new PublicKey("SMTWALLETxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 const RPC_URL = process.env.SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com";
@@ -215,7 +215,7 @@ async function updateShares(wallet, connection, args) {
 async function main() {
   const args = parseArgs(process.argv.slice(2));
 
-  const privateKey = process.env.SOLANA_PRIVATE_KEY;
+  const privateKey = await getKey("SOLANA_PRIVATE_KEY");
   if (!privateKey) {
     console.log(JSON.stringify({ success: false, error: "SOLANA_PRIVATE_KEY not set. Run setup first." }));
     process.exit(1);

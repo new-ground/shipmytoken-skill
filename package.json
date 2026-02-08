@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "private": true,
-  "description": "Launch Solana tokens on Pumpfun via OpenClaw",
+  "description": "Launch Solana tokens on Pumpfun via chat. An Agent Skill for any AI agent.",
   "dependencies": {
     "@pump-fun/pump-sdk": "latest",
     "@pump-fun/pump-swap-sdk": "latest",

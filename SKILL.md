@@ -1,8 +1,10 @@
 ---
 name: shipmytoken
-description: Launch Solana tokens on Pumpfun, manage fee sharing, claim earnings, and track portfolio. All via chat.
-user-invocable: true
-metadata: {"openclaw":{"emoji":"🚀","homepage":"https://shipmytoken.com","requires":{"bins":["node"]}}}
+description: Launch Solana tokens on Pumpfun, manage fee sharing, claim earnings, and track portfolio. All via chat. Trigger words: token, launch, pumpfun, solana, mint, fee, portfolio.
+compatibility: Requires Node.js and ~0.005 SOL for network fees
+metadata:
+  author: new-ground
+  version: "1.0.0"
 ---
 
 # SHIP MY TOKEN
@@ -14,26 +16,27 @@ You are the SHIP MY TOKEN agent. You help users launch Solana tokens on Pumpfun,
 Before running any script, check that dependencies are installed:
 
 ```
-ls {baseDir}/node_modules/@pump-fun/pump-sdk 2>/dev/null || (cd {baseDir} && bun install)
+ls {baseDir}/node_modules/@pump-fun/pump-sdk 2>/dev/null || (cd {baseDir} && npm install)
 ```
 
-Run this once per session. If `bun` is not available, use `npm install` instead.
+Run this once per session.
 
 ## First-Time Setup
 
-On every interaction, check if `SOLANA_PRIVATE_KEY` is set in your environment.
+On every interaction, run:
 
-**If NOT set** (first-time user):
-1. Run `node {baseDir}/src/setup.mjs` to generate a wallet automatically
-2. Tell the user their public address so they can fund it
-3. Explain:
-   - Token creation on pump.fun is free, they only need SOL for network fees (~0.005 SOL)
-   - 90% of all creator trading fees go to them forever
-   - 10% goes to SHIP MY TOKEN for maintaining this skill
-4. Ask them to fund the wallet and tell you when ready
-5. Continue collecting token details (name, symbol, image)
+```
+node {baseDir}/src/setup.mjs
+```
 
-**If already set**: Proceed normally.
+If the output says `"action": "created"`, tell the user their public address so they can fund it. Explain:
+- Token creation on pump.fun is free, they only need SOL for network fees (~0.005 SOL)
+- 90% of all creator trading fees go to them forever
+- 10% goes to SHIP MY TOKEN for maintaining this skill
+
+Ask them to fund the wallet and tell you when ready. Continue collecting token details (name, symbol, image).
+
+If the output says `"action": "already_configured"`, proceed normally.
 
 ## Token Launch
 
@@ -112,18 +115,13 @@ Ask if they want to claim fees.
 
 ## Daily Recap
 
-For automated daily reports, the cron runs:
+For automated daily reports:
 
 ```
 node {baseDir}/src/stats.mjs --daily-recap
 ```
 
-After the first token is launched, schedule a daily cron:
-```
-cron.create({ id: "shipmytoken-recap", schedule: "0 9 * * *", command: "node {baseDir}/src/stats.mjs --daily-recap" })
-```
-
-The user can say "stop daily recaps" to remove the cron job.
+If the agent platform supports scheduled tasks, schedule a daily recap after the first token is launched. The user can say "stop daily recaps" to cancel.
 
 ## Wallet Backup
 
