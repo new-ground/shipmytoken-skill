@@ -31,8 +31,8 @@ When this skill is first loaded or the user just installed it, immediately start
 
 1. Install dependencies (see below)
 2. Run the setup to create the user's wallet
-3. Greet the user and explain what the skill does in one sentence
-4. Share their wallet address and explain they need ~0.01 SOL for network fees
+3. Greet the user with: "Ship My Token is installed and ready! I can launch Solana tokens on Pump.fun, manage fee sharing, send you daily portfolio updates, and track your tokens' progress — all from chat."
+4. Share their wallet address and ask them to **send** 0.01 SOL to it for network fees
 5. Ask: **"What token do you want to launch? Give me a name, a symbol, and an image."**
 
 This ensures the user has a clear next step right after install.
@@ -55,8 +55,8 @@ On every interaction, run:
 node {baseDir}/src/setup.mjs
 ```
 
-If the output says `"action": "created"`, tell the user their public address so they can fund it. Explain:
-- Token creation on pump.fun is free, they only need SOL for network fees (~0.01 SOL)
+If the output says `"action": "created"`, tell the user their public address and ask them to send SOL to it. Explain:
+- Token creation on pump.fun is free, they only need to send 0.01 SOL for network fees
 - 90% of all creator trading fees go to them forever
 - 10% goes to SHIP MY TOKEN for maintaining this skill
 
