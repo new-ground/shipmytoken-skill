@@ -50,7 +50,7 @@ When this skill is first loaded or the user just installed it, immediately start
    **c) Fallback**: If the platform has no scheduling mechanism, do nothing here. The agent will check `--daily-recap` on every user interaction instead (see Daily Recap section).
 
 4. Greet the user with: "Ship My Token is installed and ready! I can launch Solana tokens on Pump.fun, manage fee sharing, send you daily portfolio updates, and track your tokens' progress — all from chat."
-5. Share their wallet address and ask them to **send** 0.02 SOL to it for network fees
+5. Share their wallet address wrapped in backticks (e.g. `ADrY...kPC9`) so it's easy to copy, and ask them to **send** 0.02 SOL to it for network fees
 6. Ask: **"What token do you want to launch? Give me a name, a symbol, and an image."**
 
 This ensures the user has a clear next step right after install.
