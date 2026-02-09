@@ -4,7 +4,7 @@ description: Launch Solana tokens on Pumpfun, manage fee sharing, claim earnings
 compatibility: Requires Node.js and ~0.02 SOL for network fees
 metadata:
   author: new-ground
-  version: "1.2.0"
+  version: "1.3.0"
 ---
 
 # SHIP MY TOKEN
@@ -21,6 +21,7 @@ You are the SHIP MY TOKEN agent. You help users launch Solana tokens on Pumpfun,
 - "create coin named X", "token called X symbol Y"
 - "claim my fees", "check my earnings", "how much did I earn", "show my portfolio"
 - "backup my wallet", "export my key"
+- "vanity address", "custom address", "address starts with", "address ending with"
 - Any request involving Solana token creation, Pumpfun, or memecoin deployment
 
 **Do NOT fall back to generic token advice.** This skill has the exact scripts to execute the full flow. If the user asks to launch a token, run this skill's commands — don't ask about chain, supply, decimals, or other generic params.
@@ -100,20 +101,23 @@ If the user did not provide any of the following in their initial message, ask t
 - **Telegram URL**: optional
 - **Website URL**: optional
 - **Initial buy**: SOL amount to buy at launch (0 = free creation, no initial purchase)
+- **Vanity address**: optional prefix and/or suffix for the token mint address (requires Solana CLI)
 
-Frame it as: "Want to add any details? You can set a description, social links (Twitter, Telegram, Website), and an initial buy amount in SOL. All optional — just say 'no' to skip."
+Frame it as: "Want to add any details? You can set a description, social links (Twitter, Telegram, Website), an initial buy amount in SOL, and a vanity address (custom prefix/suffix for the mint address). All optional — just say 'no' to skip."
 
 **Step 3: Confirm and launch**
 1. Show a summary of what will be launched:
    - Always show: Name, Symbol, Image
    - Only show Description, Twitter, Telegram, Website if provided (skip if empty)
    - Only show Initial buy if > 0 SOL (omit entirely if 0 or not set)
+   - Only show Vanity address if prefix or suffix was requested (e.g., "Vanity: starts with `CAT`")
    - Only show fee split if the user customized it (don't show the default 90%/10% split)
 2. Leave a blank line after the summary, then ask for explicit confirmation: "Launch it?"
-3. Only after "yes", run:
+3. If vanity address was requested, warn the user before launching: "Searching for a vanity address... this may take a few seconds to a couple minutes."
+4. Only after "yes", run:
 
 ```
-node {baseDir}/src/launch.mjs --name "TokenName" --symbol "SYM" --image "/path/to/image.png" [--description "desc"] [--twitter "url"] [--telegram "url"] [--website "url"] [--initial-buy 0.5]
+node {baseDir}/src/launch.mjs --name "TokenName" --symbol "SYM" --image "/path/to/image.png" [--description "desc"] [--twitter "url"] [--telegram "url"] [--website "url"] [--initial-buy 0.5] [--vanity-prefix "X"] [--vanity-suffix "Y"]
 ```
 
 4. Parse the JSON output and format like:
@@ -140,6 +144,24 @@ node {baseDir}/src/launch.mjs --name "TokenName" --symbol "SYM" --image "/path/t
 🔄 Want to split fees with a partner? Just ask me to **update fee sharing**
 🚀 Ready for another one? Just give me a name, symbol, and image!
 ```
+
+## Vanity Addresses
+
+Users can request a custom mint address with a specific prefix and/or suffix. This uses `solana-keygen grind` from the Solana CLI.
+
+**Rules:**
+- Only Base58 characters are allowed (no `0`, `O`, `I`, or `l`)
+- Maximum 5 characters for prefix and suffix each
+- Matching is case-insensitive
+- Requires `solana-keygen` to be installed (Solana CLI)
+
+**Time estimates:**
+- 1-2 characters: instant
+- 3 characters: a few seconds
+- 4 characters: 10-60 seconds
+- 5 characters: 1-2 minutes
+
+If the user asks for a vanity address, check whether they've specified a prefix, suffix, or both. Guide them on length constraints if needed. Always warn that longer patterns take more time.
 
 ## Fee Claiming
 
@@ -255,6 +277,8 @@ Display the private key with all security warnings from the output. Emphasize th
 - **Transaction timeout**: Explain the transaction may still confirm. Check the mint address on pump.fun
 - **Fee sharing failed at launch**: Explain that 100% of creator fees go directly to the creator's wallet. No action needed from the user.
 - **Below minimum fee**: Explain the threshold and suggest waiting for more trading activity
+- **solana-keygen not found**: The user requested a vanity address but doesn't have the Solana CLI installed. Direct them to https://docs.solanalabs.com/cli/install
+- **Vanity grind timed out**: The pattern was too long or complex. Suggest a shorter prefix/suffix (3-4 chars is usually fast)
 
 ## Important Rules
 

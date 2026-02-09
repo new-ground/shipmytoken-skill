@@ -8,12 +8,20 @@ import {
 } from "@solana/web3.js";
 import BN from "bn.js";
 import bs58 from "bs58";
+import { execFile } from "child_process";
+import { randomBytes } from "crypto";
+import { mkdir, readFile, readdir, unlink, rmdir } from "fs/promises";
+import { tmpdir } from "os";
+import { join } from "path";
 import { readTokenHistory, writeTokenHistory, getKey } from "./config.mjs";
 
 const SHIPMYTOKEN_WALLET = new PublicKey("7Z9vCDFzwe2DsTq4zvmrurScehUYAgUifiycgD6ZYa6T");
 const RPC_URL = process.env.SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com";
 const IPFS_ENDPOINT = "https://pump.fun/api/ipfs";
 const MAX_RETRIES = 3;
+const BASE58_CHARS = /^[1-9A-HJ-NP-Za-km-z]+$/;
+const VANITY_TIMEOUT_MS = 120_000;
+const MAX_VANITY_LEN = 5;
 
 function parseArgs(argv) {
   const args = {};
@@ -34,6 +42,70 @@ function parseArgs(argv) {
 
 async function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function validateVanityPattern(prefix, suffix) {
+  for (const [label, value] of [["Prefix", prefix], ["Suffix", suffix]]) {
+    if (!value) continue;
+    if (!BASE58_CHARS.test(value)) {
+      return `${label} "${value}" contains invalid characters. Only Base58 characters are allowed (no 0, O, I, or l).`;
+    }
+    if (value.length > MAX_VANITY_LEN) {
+      return `${label} is too long (${value.length} chars). Maximum is ${MAX_VANITY_LEN} characters.`;
+    }
+  }
+  return null;
+}
+
+async function grindVanityKeypair(prefix, suffix) {
+  const tempDir = join(tmpdir(), `smt-grind-${randomBytes(8).toString("hex")}`);
+  await mkdir(tempDir, { recursive: true });
+
+  try {
+    const args = ["grind"];
+    if (prefix && suffix) {
+      args.push("--starts-and-ends-with", `${prefix}:${suffix}`);
+    } else if (prefix) {
+      args.push("--starts-with", prefix);
+    } else {
+      args.push("--ends-with", suffix);
+    }
+    args.push("--ignore-case");
+
+    const keypairBytes = await new Promise((resolve, reject) => {
+      execFile("solana-keygen", args, { cwd: tempDir, timeout: VANITY_TIMEOUT_MS }, (error) => {
+        if (error) {
+          if (error.code === "ENOENT") {
+            reject(new Error(
+              "solana-keygen not found. Install the Solana CLI: https://docs.solanalabs.com/cli/install"
+            ));
+          } else if (error.killed) {
+            reject(new Error(
+              `Vanity address search timed out after ${VANITY_TIMEOUT_MS / 1000}s. Try a shorter prefix/suffix.`
+            ));
+          } else {
+            reject(new Error(`Vanity grind failed: ${error.message}`));
+          }
+          return;
+        }
+        resolve(null);
+      });
+    }).then(async () => {
+      const files = await readdir(tempDir);
+      const jsonFile = files.find((f) => f.endsWith(".json"));
+      if (!jsonFile) throw new Error("Vanity grind produced no keypair file.");
+      const raw = await readFile(join(tempDir, jsonFile), "utf-8");
+      return JSON.parse(raw);
+    });
+
+    return Keypair.fromSecretKey(Uint8Array.from(keypairBytes));
+  } finally {
+    try {
+      const files = await readdir(tempDir);
+      for (const f of files) await unlink(join(tempDir, f));
+      await rmdir(tempDir);
+    } catch {}
+  }
 }
 
 async function uploadMetadata({ name, symbol, description, image, twitter, telegram, website }) {
@@ -82,7 +154,7 @@ async function main() {
   if (!args.name || !args.symbol || !args.image) {
     console.log(JSON.stringify({
       success: false,
-      error: "Missing required args. Usage: --name <name> --symbol <symbol> --image <path|url> [--description <desc>] [--twitter <url>] [--telegram <url>] [--website <url>] [--initial-buy <sol_amount>]"
+      error: "Missing required args. Usage: --name <name> --symbol <symbol> --image <path|url> [--description <desc>] [--twitter <url>] [--telegram <url>] [--website <url>] [--initial-buy <sol_amount>] [--vanity-prefix <prefix>] [--vanity-suffix <suffix>]"
     }));
     process.exit(1);
   }
@@ -95,6 +167,22 @@ async function main() {
 
   const wallet = Keypair.fromSecretKey(bs58.decode(privateKey));
   const connection = new Connection(RPC_URL, "confirmed");
+
+  // Generate or grind mint keypair (before IPFS upload so we don't waste resources on failure)
+  let mintKeypair;
+  const vanityPrefix = typeof args["vanity-prefix"] === "string" ? args["vanity-prefix"] : null;
+  const vanitySuffix = typeof args["vanity-suffix"] === "string" ? args["vanity-suffix"] : null;
+
+  if (vanityPrefix || vanitySuffix) {
+    const err = validateVanityPattern(vanityPrefix, vanitySuffix);
+    if (err) {
+      console.log(JSON.stringify({ success: false, error: err }));
+      process.exit(1);
+    }
+    mintKeypair = await grindVanityKeypair(vanityPrefix, vanitySuffix);
+  } else {
+    mintKeypair = Keypair.generate();
+  }
 
   // Check balance (network fees + optional initial buy)
   const initialBuyAmount = parseFloat(args["initial-buy"] || "0");
@@ -124,9 +212,6 @@ async function main() {
     telegram: args.telegram || "",
     website: args.website || "",
   });
-
-  // Generate mint keypair
-  const mintKeypair = Keypair.generate();
 
   // Import pump SDK
   const { PumpSdk, OnlinePumpSdk } = await import("@pump-fun/pump-sdk");

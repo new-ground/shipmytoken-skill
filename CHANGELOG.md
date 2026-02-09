@@ -2,6 +2,13 @@
 
 All notable changes to Ship My Token will be documented in this file.
 
+## [1.3.0] - 2026-02-09
+
+### Added
+- Vanity address support: `--vanity-prefix` and `--vanity-suffix` flags for custom token mint addresses
+- Uses `solana-keygen grind` (Solana CLI) — fast, cross-platform, case-insensitive
+- Base58 validation, 5-char max, 2-minute timeout with clear error messages
+
 ## [1.2.0] - 2026-02-09
 
 ### Added
