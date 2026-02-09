@@ -2,6 +2,16 @@
 
 All notable changes to Ship My Token will be documented in this file.
 
+## [1.2.0] - 2026-02-09
+
+### Added
+- "What's next" section after successful token launch guiding users to fee claiming, portfolio, fee sharing, and launching another token
+
+### Fixed
+- Claimable fees showing 0 for tokens with fee sharing configured — now sums per-token distributable fees via getMinimumDistributableFee
+- Bonding curve progress overstated by ~54% due to hardcoded SOL constants — now uses on-chain token reserves from PumpFun Global state
+- Earnings queries ("how much did I earn") triggering on-chain fee claims instead of showing read-only portfolio
+
 ## [1.1.1] - 2026-02-09
 
 ### Changed
