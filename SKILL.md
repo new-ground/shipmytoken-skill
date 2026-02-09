@@ -98,11 +98,17 @@ Frame it as: "Want to add any details? You can set a description, social links (
 node {baseDir}/src/launch.mjs --name "TokenName" --symbol "SYM" --image "/path/to/image.png" [--description "desc"] [--twitter "url"] [--telegram "url"] [--website "url"] [--initial-buy 0.5]
 ```
 
-4. Parse the JSON output and report results:
-   - Token name, symbol, mint address
-   - Link: `https://pump.fun/coin/<mint>`
-   - Fee sharing status
-   - If fee sharing failed, explain that 100% of creator fees go directly to the creator's wallet
+4. Parse the JSON output and format like:
+
+```
+🚀 **MoonCat** (MCAT) is live!
+
+🔗 [View on pump.fun](https://pump.fun/coin/<mint>)
+🏦 Mint: `<mint>`
+✅ Fee sharing: 90% you / 10% Ship My Token
+```
+
+   If fee sharing failed, replace the last line with: "⚠️ Fee sharing not configured — 100% of creator fees go directly to your wallet."
 
 ## Fee Claiming
 
@@ -112,7 +118,17 @@ When the user says "claim my fees", "check my earnings", or similar:
 node {baseDir}/src/fees.mjs --claim
 ```
 
-Report the breakdown per token: amount claimed, graduated vs bonding curve status. If any tokens are below the minimum distributable fee, explain the threshold. If a token shows as skipped because fee sharing is not configured, explain that 100% of creator fees go directly to the creator's wallet — there is nothing to claim through the script.
+Format the output like:
+
+```
+💸 **Fee Claim Results**
+
+✅ **MoonCat** (MCAT) — claimed **0.05 SOL**
+⏳ **DogWif** (DWF) — below minimum (need 0.01 SOL, have 0.003 SOL)
+⚠️ **FrogCoin** (FROG) — fee sharing not configured (fees go directly to your wallet)
+```
+
+If any tokens are below the minimum distributable fee, explain they need more trading activity. If a token shows as skipped because fee sharing is not configured, explain that 100% of creator fees go directly to the creator's wallet.
 
 ## Fee Sharing Updates
 
@@ -137,16 +153,35 @@ When the user says "show my tokens", "portfolio", "how are my tokens doing":
 node {baseDir}/src/stats.mjs --portfolio
 ```
 
-Present the data clearly for each token:
-- Name, symbol, launch date
-- Status: Graduated (PumpSwap AMM) or Bonding curve (X% to graduation)
-- Price and market cap (if graduated)
-- Bonding curve progress (if not graduated)
-- Unclaimed fees and user's claimable share
-- Total claimable fees across all tokens
-- Wallet SOL balance
+Format the output exactly like this example (adapt values from the JSON):
 
-Ask if they want to claim fees.
+```
+📊 **Portfolio**
+
+💰 **0.003 SOL** balance
+🏦 Wallet: `ADrY...kPC9`
+💸 Claimable fees: **0.12 SOL**
+
+---
+
+**1. MoonCat** (MCAT)
+🟢 Graduated — 0.00042 SOL — MC $42.0K
+🔗 [pump.fun](https://pump.fun/coin/<mint>)
+
+**2. DogWif** (DWF)
+🟡 Bonding curve — 23% to graduation
+🔗 [pump.fun](https://pump.fun/coin/<mint>)
+```
+
+Rules:
+- Show wallet address truncated (first 4 + last 4 chars)
+- Use 🟢 for graduated tokens, 🟡 for bonding curve
+- Only show price and market cap for graduated tokens
+- Only show bonding curve % for non-graduated tokens
+- Format SOL amounts to 3 decimal places max, market cap as $X.XK/M
+- Each token gets a pump.fun link
+- End with: "Want me to claim your fees?" (only if claimable fees > 0)
+- If there are errors fetching data for a token, still show its name/symbol and note the data is temporarily unavailable
 
 ## Daily Recap
 
