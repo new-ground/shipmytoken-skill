@@ -5,7 +5,7 @@ import {
 } from "@solana/web3.js";
 import { unpackAccount } from "@solana/spl-token";
 import bs58 from "bs58";
-import { readTokenHistory, writeTokenHistory, getKey } from "./config.mjs";
+import { readTokenHistory, writeTokenHistory, readConfig, writeConfig, getKey } from "./config.mjs";
 
 const RPC_URL = process.env.SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com";
 const GRADUATION_THRESHOLD_SOL = 85;
@@ -114,6 +114,16 @@ async function main() {
     process.exit(1);
   }
 
+  // For daily recap, check if 24h have passed since the last one
+  if (isDailyRecap) {
+    const config = await readConfig();
+    const last = config.lastDailyRecap;
+    if (last && Date.now() - new Date(last).getTime() < 24 * 60 * 60 * 1000) {
+      console.log(JSON.stringify({ success: true, action: "daily_recap", due: false }));
+      return;
+    }
+  }
+
   const privateKey = await getKey("SOLANA_PRIVATE_KEY");
   if (!privateKey) {
     console.log(JSON.stringify({ success: false, error: "SOLANA_PRIVATE_KEY not set. Run setup first." }));
@@ -157,6 +167,11 @@ async function main() {
     totalUnclaimedFees = Number(fees) / 1e9;
   } catch {
     // Creator vault may not exist yet if no fees have been earned
+  }
+
+  // Record timestamp so the next daily recap won't fire for 24h
+  if (isDailyRecap) {
+    await writeConfig("lastDailyRecap", new Date().toISOString());
   }
 
   console.log(JSON.stringify({
