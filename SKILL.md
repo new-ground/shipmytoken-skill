@@ -130,6 +130,17 @@ node {baseDir}/src/launch.mjs --name "TokenName" --symbol "SYM" --image "/path/t
    - If fee sharing failed: "⚠️ Fee sharing not configured — 100% of creator fees go directly to your wallet."
    - If the user did NOT customize the split and fee sharing succeeded: don't show any fee sharing line
 
+5. After the launch confirmation, always add a "What's next" section:
+
+```
+**What's next?**
+📈 Your token starts on the bonding curve — once ~85 SOL of buys happen, it graduates to PumpSwap AMM
+💸 You earn creator trading fees on every trade — ask me to **claim your fees** anytime
+📊 Say **"portfolio"** to see all your tokens, bonding curve progress, and claimable fees
+🔄 Want to split fees with a partner? Just ask me to **update fee sharing**
+🚀 Ready for another one? Just give me a name, symbol, and image!
+```
+
 ## Fee Claiming
 
 When the user says "claim my fees", "check my earnings", or similar:
