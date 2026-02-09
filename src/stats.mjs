@@ -9,6 +9,7 @@ import { readTokenHistory, writeTokenHistory, getKey } from "./config.mjs";
 
 const RPC_URL = process.env.SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com";
 const GRADUATION_THRESHOLD_SOL = 85;
+const INITIAL_VIRTUAL_SOL = 30;
 const TOTAL_SUPPLY = 1_000_000_000;
 
 function parseArgs(argv) {
@@ -84,7 +85,8 @@ async function getTokenStats(connection, wallet, token, sdk, pumpAmmSdk) {
     try {
       const bondingCurve = await sdk.fetchBondingCurve(mint);
       const virtualSolReserves = Number(bondingCurve.virtualSolReserves) / 1e9;
-      const progressPercent = Math.min(100, (virtualSolReserves / GRADUATION_THRESHOLD_SOL) * 100);
+      const realSolContributed = Math.max(0, virtualSolReserves - INITIAL_VIRTUAL_SOL);
+      const progressPercent = Math.min(100, (realSolContributed / (GRADUATION_THRESHOLD_SOL - INITIAL_VIRTUAL_SOL)) * 100);
 
       result.bondingCurveProgress = Math.round(progressPercent * 100) / 100;
       result.virtualSolReserves = virtualSolReserves;
