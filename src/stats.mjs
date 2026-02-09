@@ -8,8 +8,6 @@ import bs58 from "bs58";
 import { readTokenHistory, writeTokenHistory, readConfig, writeConfig, getKey } from "./config.mjs";
 
 const RPC_URL = process.env.SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com";
-const GRADUATION_THRESHOLD_SOL = 85;
-const INITIAL_VIRTUAL_SOL = 30;
 const TOTAL_SUPPLY = 1_000_000_000;
 
 function parseArgs(argv) {
@@ -29,7 +27,7 @@ function parseArgs(argv) {
   return args;
 }
 
-async function getTokenStats(connection, wallet, token, sdk, pumpAmmSdk) {
+async function getTokenStats(connection, wallet, token, sdk, pumpAmmSdk, globalState) {
   const mint = new PublicKey(token.mint);
 
   // Check graduation (always on-chain, never cached)
@@ -84,13 +82,19 @@ async function getTokenStats(connection, wallet, token, sdk, pumpAmmSdk) {
   } else {
     try {
       const bondingCurve = await sdk.fetchBondingCurve(mint);
+      const initialRealTokens = Number(globalState.initialRealTokenReserves);
+      const currentRealTokens = Number(bondingCurve.realTokenReserves);
+      const progressPercent = Math.min(100, Math.max(0, (1 - currentRealTokens / initialRealTokens) * 100));
+
       const virtualSolReserves = Number(bondingCurve.virtualSolReserves) / 1e9;
-      const realSolContributed = Math.max(0, virtualSolReserves - INITIAL_VIRTUAL_SOL);
-      const progressPercent = Math.min(100, (realSolContributed / (GRADUATION_THRESHOLD_SOL - INITIAL_VIRTUAL_SOL)) * 100);
+      const virtualTokenReserves = Number(bondingCurve.virtualTokenReserves);
+      const tokenTotalSupply = Number(bondingCurve.tokenTotalSupply);
 
       result.bondingCurveProgress = Math.round(progressPercent * 100) / 100;
       result.virtualSolReserves = virtualSolReserves;
-      result.estimatedMcap = virtualSolReserves * 2 * TOTAL_SUPPLY / 1e9;
+      result.estimatedMcap = virtualTokenReserves > 0
+        ? (virtualSolReserves / virtualTokenReserves) * tokenTotalSupply
+        : 0;
     } catch (err) {
       result.bondingCurveError = err.message;
     }
@@ -148,10 +152,11 @@ async function main() {
   const { OnlinePumpAmmSdk } = await import("@pump-fun/pump-swap-sdk");
   const sdk = new OnlinePumpSdk(connection);
   const pumpAmmSdk = new OnlinePumpAmmSdk(connection);
+  const globalState = await sdk.fetchGlobal();
 
   const tokenStats = [];
   for (const token of history.tokens) {
-    const stats = await getTokenStats(connection, wallet, token, sdk, pumpAmmSdk);
+    const stats = await getTokenStats(connection, wallet, token, sdk, pumpAmmSdk, globalState);
     tokenStats.push(stats);
   }
 
