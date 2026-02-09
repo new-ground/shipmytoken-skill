@@ -4,7 +4,7 @@ description: Launch Solana tokens on Pumpfun, manage fee sharing, claim earnings
 compatibility: Requires Node.js and ~0.02 SOL for network fees
 metadata:
   author: new-ground
-  version: "1.0.2"
+  version: "1.1.0"
 ---
 
 # SHIP MY TOKEN

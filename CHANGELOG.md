@@ -2,6 +2,15 @@
 
 All notable changes to Ship My Token will be documented in this file.
 
+## [1.1.0] - 2026-02-09
+
+### Added
+- Automatic daily portfolio recaps with 24h debounce — works via heartbeat (OpenClaw), cron, or on user interaction as fallback
+- Setup flow now configures the platform's scheduling mechanism during onboarding (HEARTBEAT.md, cron, or fallback)
+
+### Changed
+- Post-launch output no longer shows default fee sharing split — only shown if user customized the split or if it failed
+
 ## [1.0.2] - 2026-02-09
 
 ### Fixed
