@@ -96,12 +96,19 @@ async function main() {
   const wallet = Keypair.fromSecretKey(bs58.decode(privateKey));
   const connection = new Connection(RPC_URL, "confirmed");
 
-  // Check balance
+  // Check balance (network fees + optional initial buy)
+  const initialBuyAmount = parseFloat(args["initial-buy"] || "0");
+  const requiredLamports = 20_000_000 + Math.floor(Math.max(0, initialBuyAmount) * 1e9);
   const balance = await connection.getBalance(wallet.publicKey);
-  if (balance < 20_000_000) {
+  if (balance < requiredLamports) {
+    const required = requiredLamports / 1e9;
+    const have = balance / 1e9;
+    const breakdown = initialBuyAmount > 0
+      ? `~0.02 SOL for network fees + ${initialBuyAmount} SOL for initial buy`
+      : `~0.02 SOL for network fees`;
     console.log(JSON.stringify({
       success: false,
-      error: `Insufficient SOL balance. Have ${balance / 1e9} SOL, need at least ~0.02 SOL for network fees.`,
+      error: `Insufficient SOL balance. Have ${have} SOL, need at least ~${required} SOL (${breakdown}).`,
       publicKey: wallet.publicKey.toBase58()
     }));
     process.exit(1);
@@ -126,14 +133,12 @@ async function main() {
   const sdk = new PumpSdk();
   const onlineSdk = new OnlinePumpSdk(connection);
 
-  const initialBuy = parseFloat(args["initial-buy"] || "0");
-
   let instructions;
-  if (initialBuy > 0) {
+  if (initialBuyAmount > 0) {
     const { getBuyTokenAmountFromSolAmount, newBondingCurve } = await import("@pump-fun/pump-sdk");
     const global = await onlineSdk.fetchGlobal();
     const feeConfig = await onlineSdk.fetchFeeConfig();
-    const solAmountBN = new BN(Math.floor(initialBuy * 1e9));
+    const solAmountBN = new BN(Math.floor(initialBuyAmount * 1e9));
     const bondingCurve = newBondingCurve(global);
     const tokenAmount = getBuyTokenAmountFromSolAmount({
       global,
