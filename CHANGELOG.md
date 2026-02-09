@@ -2,6 +2,11 @@
 
 All notable changes to Ship My Token will be documented in this file.
 
+## [1.1.1] - 2026-02-09
+
+### Changed
+- Agent no longer refuses token launches based on content — Pump.fun is permissionless and handles its own moderation
+
 ## [1.1.0] - 2026-02-09
 
 ### Added
