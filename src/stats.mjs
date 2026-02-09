@@ -99,7 +99,7 @@ async function getTokenStats(connection, wallet, token, sdk, pumpAmmSdk, globalS
       result.bondingCurveError = err.message;
     }
 
-    result.status = `Bonding curve (${result.bondingCurveProgress || 0}% to graduation)`;
+    result.status = `Bonding curve — ${result.bondingCurveProgress || 0}% graduated`;
   }
 
   // Per-token claimable fees (only for tokens with fee sharing)

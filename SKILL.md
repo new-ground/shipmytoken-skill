@@ -202,7 +202,7 @@ Format the output exactly like this example (adapt values from the JSON):
 🔗 [pump.fun](https://pump.fun/coin/<mint>)
 
 **2. DogWif** (DWF)
-🟡 Bonding curve — 23% to graduation
+🟡 Bonding curve — 23% graduated
 🔗 [pump.fun](https://pump.fun/coin/<mint>)
 ```
 
