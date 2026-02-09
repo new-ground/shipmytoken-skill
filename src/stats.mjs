@@ -140,10 +140,10 @@ async function main() {
     return;
   }
 
-  const { PumpSdk } = await import("@pump-fun/pump-sdk");
-  const { PumpAmmSdk } = await import("@pump-fun/pump-swap-sdk");
-  const sdk = new PumpSdk(connection);
-  const pumpAmmSdk = new PumpAmmSdk(connection);
+  const { OnlinePumpSdk } = await import("@pump-fun/pump-sdk");
+  const { OnlinePumpAmmSdk } = await import("@pump-fun/pump-swap-sdk");
+  const sdk = new OnlinePumpSdk(connection);
+  const pumpAmmSdk = new OnlinePumpAmmSdk(connection);
 
   const tokenStats = [];
   for (const token of history.tokens) {

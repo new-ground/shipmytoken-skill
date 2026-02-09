@@ -2,6 +2,13 @@
 
 All notable changes to Ship My Token will be documented in this file.
 
+## [1.0.2] - 2026-02-09
+
+### Fixed
+- Stats and fee claiming broken by pump-sdk v1.27.0 API change. The SDK split into offline (`PumpSdk`) and online (`OnlinePumpSdk`) classes — updated stats, fees, and launch scripts to use the correct classes.
+- Launch with `--initial-buy` was also broken (calling `fetchGlobal`/`fetchFeeConfig` on the offline SDK).
+- Pinned `@pump-fun/pump-sdk` and `@pump-fun/pump-swap-sdk` to `^1.27.0` / `^1.13.0` to prevent future silent breakage from `latest`.
+
 ## [1.0.1] - 2025-02-09
 
 ### Fixed

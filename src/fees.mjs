@@ -30,8 +30,8 @@ function parseArgs(argv) {
 }
 
 async function claimFees(wallet, connection) {
-  const { PumpSdk } = await import("@pump-fun/pump-sdk");
-  const sdk = new PumpSdk(connection);
+  const { OnlinePumpSdk } = await import("@pump-fun/pump-sdk");
+  const sdk = new OnlinePumpSdk(connection);
 
   const history = await readTokenHistory();
   if (history.tokens.length === 0) {
@@ -170,7 +170,7 @@ async function updateShares(wallet, connection, args) {
   }
 
   const { PumpSdk } = await import("@pump-fun/pump-sdk");
-  const sdk = new PumpSdk(connection);
+  const sdk = new PumpSdk();
 
   const currentShareholders = (token.shareholders || []).map((s) => new PublicKey(s.address));
   const newShareholders = entries.map((e) => ({

@@ -122,16 +122,17 @@ async function main() {
   const mintKeypair = Keypair.generate();
 
   // Import pump SDK
-  const { PumpSdk } = await import("@pump-fun/pump-sdk");
-  const sdk = new PumpSdk(connection);
+  const { PumpSdk, OnlinePumpSdk } = await import("@pump-fun/pump-sdk");
+  const sdk = new PumpSdk();
+  const onlineSdk = new OnlinePumpSdk(connection);
 
   const initialBuy = parseFloat(args["initial-buy"] || "0");
 
   let instructions;
   if (initialBuy > 0) {
     const { getBuyTokenAmountFromSolAmount, newBondingCurve } = await import("@pump-fun/pump-sdk");
-    const global = await sdk.fetchGlobal();
-    const feeConfig = await sdk.fetchFeeConfig();
+    const global = await onlineSdk.fetchGlobal();
+    const feeConfig = await onlineSdk.fetchFeeConfig();
     const solAmountBN = new BN(Math.floor(initialBuy * 1e9));
     const bondingCurve = newBondingCurve(global);
     const tokenAmount = getBuyTokenAmountFromSolAmount({
