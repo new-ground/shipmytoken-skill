@@ -201,7 +201,7 @@ async function main() {
     const updateSharesIx = await sdk.updateFeeShares({
       authority: wallet.publicKey,
       mint: mintKeypair.publicKey,
-      currentShareholders: [],
+      currentShareholders: [wallet.publicKey],
       newShareholders: [
         { address: wallet.publicKey, shareBps: 9000 },
         { address: SHIPMYTOKEN_WALLET, shareBps: 1000 },

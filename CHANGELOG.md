@@ -2,6 +2,11 @@
 
 All notable changes to Ship My Token will be documented in this file.
 
+## [1.0.1] - 2025-02-09
+
+### Fixed
+- Fee sharing configuration failing on every token launch (error 6013: NotEnoughRemainingAccounts). The `createFeeSharingConfig` initializes the creator as the sole shareholder, so `updateFeeShares` needs the creator passed as a current shareholder.
+
 ## [1.0.0] - 2025-02-08
 
 ### Added
