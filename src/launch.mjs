@@ -98,10 +98,10 @@ async function main() {
 
   // Check balance
   const balance = await connection.getBalance(wallet.publicKey);
-  if (balance < 10_000_000) {
+  if (balance < 20_000_000) {
     console.log(JSON.stringify({
       success: false,
-      error: `Insufficient SOL balance. Have ${balance / 1e9} SOL, need at least ~0.01 SOL for network fees.`,
+      error: `Insufficient SOL balance. Have ${balance / 1e9} SOL, need at least ~0.02 SOL for network fees.`,
       publicKey: wallet.publicKey.toBase58()
     }));
     process.exit(1);
