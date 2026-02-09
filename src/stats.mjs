@@ -102,6 +102,16 @@ async function getTokenStats(connection, wallet, token, sdk, pumpAmmSdk, globalS
     result.status = `Bonding curve (${result.bondingCurveProgress || 0}% to graduation)`;
   }
 
+  // Per-token claimable fees (only for tokens with fee sharing)
+  if (token.feeSharingConfigured) {
+    try {
+      const feeResult = await sdk.getMinimumDistributableFee(mint);
+      result.claimableFees = Number(feeResult.distributableFees) / 1e9;
+    } catch {
+      result.claimableFees = 0;
+    }
+  }
+
   return result;
 }
 
@@ -163,15 +173,24 @@ async function main() {
   // Save updated history (pool addresses may have been updated)
   await writeTokenHistory(history);
 
-  // Wallet balance and unclaimed fees (wallet-level, called once)
+  // Wallet balance and unclaimed fees
   const walletBalance = await connection.getBalance(wallet.publicKey);
 
   let totalUnclaimedFees = 0;
+
+  // 1. Creator vault balance (fees from tokens WITHOUT fee sharing)
   try {
     const fees = await sdk.getCreatorVaultBalanceBothPrograms(wallet.publicKey);
-    totalUnclaimedFees = Number(fees) / 1e9;
+    totalUnclaimedFees += Number(fees) / 1e9;
   } catch {
     // Creator vault may not exist yet if no fees have been earned
+  }
+
+  // 2. Per-token distributable fees (already fetched in getTokenStats)
+  for (const stat of tokenStats) {
+    if (stat.claimableFees) {
+      totalUnclaimedFees += stat.claimableFees;
+    }
   }
 
   // Record timestamp so the next daily recap won't fire for 24h
