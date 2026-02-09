@@ -96,14 +96,6 @@ async function getTokenStats(connection, wallet, token, sdk, pumpAmmSdk) {
     result.status = `Bonding curve (${result.bondingCurveProgress || 0}% to graduation)`;
   }
 
-  // Fees
-  try {
-    const fees = await sdk.getCreatorVaultBalanceBothPrograms(wallet.publicKey);
-    result.unclaimedFees = Number(fees) / 1e9;
-  } catch (err) {
-    result.feesError = err.message;
-  }
-
   return result;
 }
 
@@ -154,10 +146,16 @@ async function main() {
   // Save updated history (pool addresses may have been updated)
   await writeTokenHistory(history);
 
-  // Wallet balance
+  // Wallet balance and unclaimed fees (wallet-level, called once)
   const walletBalance = await connection.getBalance(wallet.publicKey);
 
-  const totalUnclaimedFees = tokenStats.reduce((sum, t) => sum + (t.unclaimedFees || 0), 0);
+  let totalUnclaimedFees = 0;
+  try {
+    const fees = await sdk.getCreatorVaultBalanceBothPrograms(wallet.publicKey);
+    totalUnclaimedFees = Number(fees) / 1e9;
+  } catch {
+    // Creator vault may not exist yet if no fees have been earned
+  }
 
   console.log(JSON.stringify({
     success: true,
