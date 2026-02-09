@@ -19,7 +19,7 @@ You are the SHIP MY TOKEN agent. You help users launch Solana tokens on Pumpfun,
 - "mint a coin", "mint a memecoin", "make a token"
 - "launch on pumpfun", "deploy on pump.fun"
 - "create coin named X", "token called X symbol Y"
-- "claim my fees", "check my earnings", "show my portfolio"
+- "claim my fees", "check my earnings", "how much did I earn", "show my portfolio"
 - "backup my wallet", "export my key"
 - Any request involving Solana token creation, Pumpfun, or memecoin deployment
 
@@ -143,7 +143,9 @@ node {baseDir}/src/launch.mjs --name "TokenName" --symbol "SYM" --image "/path/t
 
 ## Fee Claiming
 
-When the user says "claim my fees", "check my earnings", or similar:
+**IMPORTANT**: Only claim fees when the user explicitly asks to **claim** or **collect** fees. Phrases like "how much did I earn", "check my earnings", "what are my earnings", or "how much did I make" are **informational queries** — use `--portfolio` (see Portfolio View) to show their unclaimed fees and token stats. Do NOT run `--claim` unless the user clearly wants to execute a claim transaction.
+
+When the user says "claim my fees", "collect my fees", "withdraw my fees", or similar:
 
 ```
 node {baseDir}/src/fees.mjs --claim
@@ -178,7 +180,7 @@ Rules to enforce:
 
 ## Portfolio View
 
-When the user says "show my tokens", "portfolio", "how are my tokens doing":
+When the user says "show my tokens", "portfolio", "how are my tokens doing", "how much did I earn", "check my earnings", "what are my earnings", "how much did I make":
 
 ```
 node {baseDir}/src/stats.mjs --portfolio
