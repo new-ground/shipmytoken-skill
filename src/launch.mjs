@@ -57,7 +57,7 @@ function validateVanityPattern(prefix, suffix) {
   return null;
 }
 
-async function grindVanityKeypair(prefix, suffix) {
+async function grindVanityKeypair(prefix, suffix, { ignoreCase = true } = {}) {
   const tempDir = join(tmpdir(), `smt-grind-${randomBytes(8).toString("hex")}`);
   await mkdir(tempDir, { recursive: true });
 
@@ -70,7 +70,7 @@ async function grindVanityKeypair(prefix, suffix) {
     } else {
       args.push("--ends-with", suffix);
     }
-    args.push("--ignore-case");
+    if (ignoreCase) args.push("--ignore-case");
 
     const keypairBytes = await new Promise((resolve, reject) => {
       execFile("solana-keygen", args, { cwd: tempDir, timeout: VANITY_TIMEOUT_MS }, (error) => {
@@ -180,8 +180,16 @@ async function main() {
       process.exit(1);
     }
     mintKeypair = await grindVanityKeypair(vanityPrefix, vanitySuffix);
-  } else {
+  } else if (args["skip-pump-suffix"]) {
     mintKeypair = Keypair.generate();
+  } else {
+    // Default: grind for "pump" suffix to match pump.fun native addresses
+    try {
+      mintKeypair = await grindVanityKeypair(null, "pump", { ignoreCase: false });
+    } catch {
+      // solana-keygen not available or timed out — fall back to random keypair
+      mintKeypair = Keypair.generate();
+    }
   }
 
   // Check balance (network fees + optional initial buy)

@@ -2,6 +2,13 @@
 
 All notable changes to Ship My Token will be documented in this file.
 
+## [1.4.0] - 2026-02-10
+
+### Added
+- Default `pump` suffix on mint addresses — tokens now match pump.fun's native address format automatically
+- Uses `solana-keygen grind --ends-with pump` (exact case); falls back silently to random address if not installed
+- `--skip-pump-suffix` flag to opt out and use a random mint address
+
 ## [1.3.0] - 2026-02-09
 
 ### Added

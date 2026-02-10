@@ -4,7 +4,7 @@ description: Launch Solana tokens on Pumpfun, manage fee sharing, claim earnings
 compatibility: Requires Node.js and ~0.02 SOL for network fees
 metadata:
   author: new-ground
-  version: "1.3.0"
+  version: "1.4.0"
 ---
 
 # SHIP MY TOKEN
@@ -117,7 +117,7 @@ Frame it as: "Want to add any details? You can set a description, social links (
 4. Only after "yes", run:
 
 ```
-node {baseDir}/src/launch.mjs --name "TokenName" --symbol "SYM" --image "/path/to/image.png" [--description "desc"] [--twitter "url"] [--telegram "url"] [--website "url"] [--initial-buy 0.5] [--vanity-prefix "X"] [--vanity-suffix "Y"]
+node {baseDir}/src/launch.mjs --name "TokenName" --symbol "SYM" --image "/path/to/image.png" [--description "desc"] [--twitter "url"] [--telegram "url"] [--website "url"] [--initial-buy 0.5] [--vanity-prefix "X"] [--vanity-suffix "Y"] [--skip-pump-suffix]
 ```
 
 4. Parse the JSON output and format like:
@@ -145,9 +145,21 @@ node {baseDir}/src/launch.mjs --name "TokenName" --symbol "SYM" --image "/path/t
 🚀 Ready for another one? Just give me a name, symbol, and image!
 ```
 
+## Pump Suffix (Default)
+
+By default, all tokens launched via this skill get a mint address ending in `pump`, matching pump.fun's native token addresses. This happens automatically using `solana-keygen grind` — no user action needed.
+
+- If `solana-keygen` is installed: the skill grinds for an exact `pump` suffix (typically 10-60 seconds)
+- If `solana-keygen` is not installed: falls back silently to a random address
+- To explicitly skip the pump suffix: pass `--skip-pump-suffix`
+
+**Do NOT mention the pump suffix grind to the user or ask about it.** It's automatic. Only mention it if:
+- The launch is taking longer than expected (explain the address is being generated)
+- The user explicitly asks about vanity addresses or the `pump` suffix
+
 ## Vanity Addresses
 
-Users can request a custom mint address with a specific prefix and/or suffix. This uses `solana-keygen grind` from the Solana CLI.
+Users can request a custom mint address with a specific prefix and/or suffix. This overrides the default `pump` suffix. Uses `solana-keygen grind` from the Solana CLI.
 
 **Rules:**
 - Only Base58 characters are allowed (no `0`, `O`, `I`, or `l`)
