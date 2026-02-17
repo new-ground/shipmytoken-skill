@@ -31,9 +31,28 @@ When this skill is first loaded or the user just installed it, immediately start
 1. Install dependencies (see below)
 2. Run the setup to create the user's wallet
 3. Set up daily recaps (see below)
-4. Greet the user with: "Ship My Token is installed and ready! I can launch Solana tokens on Pump.fun, manage fee sharing, send you daily portfolio updates, and track your tokens' progress — all from chat."
-5. Share their wallet address wrapped in backticks (e.g. `ADrY...kPC9`) so it's easy to copy, and ask them to **send** 0.02 SOL to it for network fees
-6. Ask: **"What token do you want to launch? Give me a name, a symbol, and an image."**
+4. Greet the user with a formatted welcome message. Use this exact structure:
+
+```
+🚀 **Ship My Token is ready!**
+
+Here's what I can do:
+🪙 Launch Solana tokens on Pump.fun
+💸 Manage fee sharing and claim earnings
+📊 Track your portfolio with daily recaps
+
+---
+
+🔑 **Your wallet**
+`<full wallet address>`
+
+Send **0.02 SOL** to this address for network fees.
+
+---
+
+**What token do you want to launch?**
+Give me a name, a symbol, and an image.
+```
 
 This ensures the user has a clear next step right after install.
 
