@@ -2,9 +2,7 @@
 name: shipmytoken
 description: Launch Solana tokens on Pumpfun, manage fee sharing, claim earnings, and track portfolio. All via chat.
 compatibility: Requires Node.js and ~0.02 SOL for network fees
-metadata:
-  author: new-ground
-  version: "1.4.0"
+metadata: {"author":"new-ground","version":"1.4.0"}
 ---
 
 # SHIP MY TOKEN
@@ -32,29 +30,35 @@ When this skill is first loaded or the user just installed it, immediately start
 
 1. Install dependencies (see below)
 2. Run the setup to create the user's wallet
-3. Set up daily recaps using the platform's scheduling mechanism. Try these in order:
-
-   **a) Heartbeat system** (OpenClaw and similar): If a `HEARTBEAT.md` file exists in the workspace root, append the task below. If it doesn't exist, create it.
-   ```markdown
-   ## Ship My Token
-   - Run `node {baseDir}/src/stats.mjs --daily-recap`
-   - If the output contains `"due": false`, respond with HEARTBEAT_OK
-   - If the output contains token data, format and send the daily portfolio recap
-   ```
-
-   **b) Cron / scheduled tasks**: If the platform supports cron jobs or scheduled tasks, register a daily job (e.g., once every 24h) that runs:
-   ```
-   node {baseDir}/src/stats.mjs --daily-recap
-   ```
-   The script has its own 24h debounce, so running it more frequently is safe — it will return `"due": false` and exit early.
-
-   **c) Fallback**: If the platform has no scheduling mechanism, do nothing here. The agent will check `--daily-recap` on every user interaction instead (see Daily Recap section).
-
+3. Set up daily recaps (see below)
 4. Greet the user with: "Ship My Token is installed and ready! I can launch Solana tokens on Pump.fun, manage fee sharing, send you daily portfolio updates, and track your tokens' progress — all from chat."
 5. Share their wallet address wrapped in backticks (e.g. `ADrY...kPC9`) so it's easy to copy, and ask them to **send** 0.02 SOL to it for network fees
 6. Ask: **"What token do you want to launch? Give me a name, a symbol, and an image."**
 
 This ensures the user has a clear next step right after install.
+
+### Daily recap scheduling
+
+Set up daily recaps using the platform's scheduling mechanism. Try these in order:
+
+**a) Heartbeat system** (OpenClaw and similar): If a `HEARTBEAT.md` file exists in the workspace root, append the task below. If it doesn't exist, create it.
+
+```markdown
+## Ship My Token
+- Run `node {baseDir}/src/stats.mjs --daily-recap`
+- If the output contains `"due": false`, respond with HEARTBEAT_OK
+- If the output contains token data, format and send the daily portfolio recap
+```
+
+**b) Cron / scheduled tasks**: If the platform supports cron jobs or scheduled tasks, register a daily job (e.g., once every 24h) that runs:
+
+```
+node {baseDir}/src/stats.mjs --daily-recap
+```
+
+The script has its own 24h debounce, so running it more frequently is safe — it will return `"due": false` and exit early.
+
+**c) Fallback**: If the platform has no scheduling mechanism, do nothing here. The agent will check `--daily-recap` on every user interaction instead (see Daily Recap section).
 
 ## Dependencies
 
@@ -75,6 +79,7 @@ node {baseDir}/src/setup.mjs
 ```
 
 If the output says `"action": "created"`, tell the user their public address and ask them to send SOL to it. Explain:
+
 - Token creation on pump.fun is free, they only need to send 0.02 SOL for network fees
 - 90% of all creator trading fees go to them forever
 - 10% goes to SHIP MY TOKEN for maintaining this skill
@@ -83,19 +88,22 @@ Ask them to fund the wallet and tell you when ready. Continue collecting token d
 
 If the output says `"action": "already_configured"`, proceed normally.
 
-If the output contains an `"update"` field, tell the user once per session: "A new version of Ship My Token is available (vX.Y.Z). Run `npx skills add new-ground/shipmytoken-skill --all` to update." Don't block the flow — just mention it.
+If the output contains an `"update"` field, tell the user once per session: "A new version of Ship My Token is available (vX.Y.Z). Run `npx skills add new-ground/shipmytoken-skill --all` or `clawhub update shipmytoken` to update." Don't block the flow — just mention it.
 
 ## Token Launch
 
 When the user wants to launch a token, follow this exact flow:
 
-**Step 1: Collect required fields (only these three)**
+### Step 1: Collect required fields (only these three)
+
 - **Name**: the token name (e.g., "MoonCat")
 - **Symbol**: the token ticker (e.g., "MCAT"). If not provided, suggest one based on the name.
 - **Image**: an attached file or a URL. Ask if not provided.
 
-**Step 2: Collect optional fields**
+### Step 2: Collect optional fields
+
 If the user did not provide any of the following in their initial message, ask them in a single follow-up:
+
 - **Description**: a short description of the token
 - **Twitter URL**: optional
 - **Telegram URL**: optional
@@ -105,22 +113,23 @@ If the user did not provide any of the following in their initial message, ask t
 
 Frame it as: "Want to add any details? You can set a description, social links (Twitter, Telegram, Website), an initial buy amount in SOL, and a vanity address (custom prefix/suffix for the mint address). All optional — just say 'no' to skip."
 
-**Step 3: Confirm and launch**
-1. Show a summary of what will be launched:
-   - Always show: Name, Symbol, Image
-   - Only show Description, Twitter, Telegram, Website if provided (skip if empty)
-   - Only show Initial buy if > 0 SOL (omit entirely if 0 or not set)
-   - Only show Vanity address if prefix or suffix was requested (e.g., "Vanity: starts with `CAT`")
-   - Only show fee split if the user customized it (don't show the default 90%/10% split)
-2. Leave a blank line after the summary, then ask for explicit confirmation: "Launch it?"
-3. If vanity address was requested, warn the user before launching: "Searching for a vanity address... this may take a few seconds to a couple minutes."
-4. Only after "yes", run:
+### Step 3: Confirm and launch
+
+Show a summary of what will be launched. Always show Name, Symbol, Image. Only show Description, Twitter, Telegram, Website if provided. Only show Initial buy if > 0 SOL. Only show Vanity address if requested. Only show fee split if the user customized it (don't show the default 90%/10% split).
+
+Leave a blank line after the summary, then ask for explicit confirmation: "Launch it?"
+
+If vanity address was requested, warn the user before launching: "Searching for a vanity address... this may take a few seconds to a couple minutes."
+
+Only after "yes", run:
 
 ```
 node {baseDir}/src/launch.mjs --name "TokenName" --symbol "SYM" --image "/path/to/image.png" [--description "desc"] [--twitter "url"] [--telegram "url"] [--website "url"] [--initial-buy 0.5] [--vanity-prefix "X"] [--vanity-suffix "Y"] [--skip-pump-suffix]
 ```
 
-4. Parse the JSON output and format like:
+### After launch
+
+Parse the JSON output and format like:
 
 ```
 🚀 **MoonCat** (MCAT) is live!
@@ -129,12 +138,13 @@ node {baseDir}/src/launch.mjs --name "TokenName" --symbol "SYM" --image "/path/t
 🏦 Mint: `<mint>`
 ```
 
-   Only add a fee sharing line if the user customized the fee split or if fee sharing failed:
-   - If the user customized the split: "✅ Fee sharing: X% you / Y% partner / 10% Ship My Token"
-   - If fee sharing failed: "⚠️ Fee sharing not configured — 100% of creator fees go directly to your wallet."
-   - If the user did NOT customize the split and fee sharing succeeded: don't show any fee sharing line
+Only add a fee sharing line if the user customized the fee split or if fee sharing failed:
 
-5. After the launch confirmation, always add a "What's next" section:
+- If the user customized the split: "✅ Fee sharing: X% you / Y% partner / 10% Ship My Token"
+- If fee sharing failed: "⚠️ Fee sharing not configured — 100% of creator fees go directly to your wallet."
+- If the user did NOT customize the split and fee sharing succeeded: don't show any fee sharing line
+
+Always add a "What's next" section:
 
 ```
 **What's next?**
@@ -154,6 +164,7 @@ By default, all tokens launched via this skill get a mint address ending in `pum
 - To explicitly skip the pump suffix: pass `--skip-pump-suffix`
 
 **Do NOT mention the pump suffix grind to the user or ask about it.** It's automatic. Only mention it if:
+
 - The launch is taking longer than expected (explain the address is being generated)
 - The user explicitly asks about vanity addresses or the `pump` suffix
 
@@ -162,12 +173,14 @@ By default, all tokens launched via this skill get a mint address ending in `pum
 Users can request a custom mint address with a specific prefix and/or suffix. This overrides the default `pump` suffix. Uses `solana-keygen grind` from the Solana CLI.
 
 **Rules:**
+
 - Only Base58 characters are allowed (no `0`, `O`, `I`, or `l`)
 - Maximum 5 characters for prefix and suffix each
 - Matching is case-insensitive
 - Requires `solana-keygen` to be installed (Solana CLI)
 
 **Time estimates:**
+
 - 1-2 characters: instant
 - 3 characters: a few seconds
 - 4 characters: 10-60 seconds
@@ -206,6 +219,7 @@ node {baseDir}/src/fees.mjs --update --mint <mint_address> --shares "addr1:6000,
 ```
 
 Rules to enforce:
+
 - SHIP MY TOKEN always keeps 10% (1000 bps). This is non-negotiable
 - Remaining 90% can be split however the user wants
 - Maximum 10 shareholders total (including SHIP MY TOKEN)
@@ -241,6 +255,7 @@ Format the output exactly like this example (adapt values from the JSON):
 ```
 
 Rules:
+
 - Show wallet address truncated (first 4 + last 4 chars)
 - Use 🟢 for graduated tokens, 🟡 for bonding curve
 - Only show price and market cap for graduated tokens
@@ -259,6 +274,7 @@ node {baseDir}/src/stats.mjs --daily-recap
 ```
 
 The script checks internally whether 24 hours have passed since the last recap:
+
 - If `"due": false` → do nothing (on heartbeat turns, respond with `HEARTBEAT_OK`)
 - If due → show the recap formatted like the portfolio view but prefixed with "📅 **Daily Recap**" instead of "📊 **Portfolio**"
 
