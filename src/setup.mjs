@@ -39,7 +39,7 @@ async function checkForUpdate() {
       return {
         current: LOCAL_VERSION,
         latest,
-        message: `Update available: v${latest}. Run: npx skills add new-ground/shipmytoken-skill --all — or: clawhub update shipmytoken`
+        message: `Update available: v${latest}. Run: npx skills add new-ground/shipmytoken-skill --all — or: npx clawhub@latest update shipmytoken`
       };
     }
   } catch {
