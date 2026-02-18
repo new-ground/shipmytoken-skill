@@ -56,9 +56,4 @@ curl -sf -X POST \
   -d "{\"tag_name\":\"v$NEW_VERSION\",\"name\":\"v$NEW_VERSION\",\"body\":$BODY}" \
   | python3 -c "import sys,json; print('GitHub release:', json.load(sys.stdin)['html_url'])"
 
-# 6. Publish to ClawhHub
-echo "Publishing to ClawhHub..."
-clawhub publish . --slug shipmytoken --name "Ship My Token" --version "$NEW_VERSION" --changelog "$CHANGELOG_MSG" --tags latest \
-  && echo "Done! v$NEW_VERSION released everywhere." \
-  || echo "ClawhHub publish failed (rate limit?). Retry manually:
-clawhub publish . --slug shipmytoken --name \"Ship My Token\" --version \"$NEW_VERSION\" --changelog \"$CHANGELOG_MSG\" --tags latest"
+echo "Done! v$NEW_VERSION released."

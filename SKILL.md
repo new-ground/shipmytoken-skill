@@ -107,7 +107,7 @@ Ask them to fund the wallet and tell you when ready. Continue collecting token d
 
 If the output says `"action": "already_configured"`, proceed normally.
 
-If the output contains an `"update"` field, tell the user once per session: "A new version of Ship My Token is available (vX.Y.Z). Run `npx skills add new-ground/shipmytoken-skill --all` or `npx clawhub@latest update shipmytoken` to update." Don't block the flow — just mention it.
+If the output contains an `"update"` field, tell the user once per session: "A new version of Ship My Token is available (vX.Y.Z). Run `npx skills add new-ground/shipmytoken-skill --all` to update." Don't block the flow — just mention it.
 
 ## Token Launch
 
@@ -303,7 +303,7 @@ On regular user messages, show the recap **before** responding to the user's req
 
 The daily recap works across all platforms thanks to the 24h debounce in the script:
 
-- **Heartbeat platforms** (OpenClaw): The heartbeat triggers the agent periodically. Most checks return `due: false` → `HEARTBEAT_OK` (suppressed). Once a day, it fires the full recap.
+- **Heartbeat platforms**: The heartbeat triggers the agent periodically. Most checks return `due: false` → `HEARTBEAT_OK` (suppressed). Once a day, it fires the full recap.
 - **Cron platforms**: The scheduled job runs the script. Same debounce logic — safe to run as often as needed.
 - **No scheduling**: The recap fires on the user's first interaction after 24 hours have passed.
 
